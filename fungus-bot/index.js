@@ -76,10 +76,15 @@ client.on('interactionCreate', async interaction => {
     
 });
 
+let count = 0;
 
 // Listen for messages
 client.on('messageCreate', async message => {
-
+    count += 1
+    if (count === 5) {
+	message.react('<:balls:894382977772044318>');
+	count = 0;
+    }
 });
 
 // login to Discord
