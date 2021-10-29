@@ -4,6 +4,7 @@ const Discord = require('discord.js');
 const { token } = require('./config.json');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
+const { Player } = require("discord-player");
 
 // create a new Discord client and give it some variables
 const { Client, Intents } = require('discord.js');
@@ -11,10 +12,20 @@ const myIntents = new Intents();
 myIntents.add('GUILD_PRESENCES', 'GUILD_MEMBERS', 'GUILD_PRESENCES');
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, 
-                            Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES], partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
+                            Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.GUILD_VOICE_STATES ], partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 client.commands = new Discord.Collection();
 const registerCommands = [];
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const player = new Player(client, {
+    ytdlOptions: {
+        quality: 'highestaudio',
+        hightWaterMark: 1 << 25,
+    }
+});
+
+client.plr = player;
+
+client.plr.on("trackStart", (queue, track) => queue.metadata.channel.send(`🎶 | Now playing **${track.title}**!`))
 
 // Place your client and guild ids here
 const clientId = '902832747368833025';
@@ -67,11 +78,24 @@ client.on('interactionCreate', async interaction => {
 
     if (!command) return;
 
-    try {
-        await command.execute(interaction, client);
-    } catch (error) {
-        await console.error(error);
-        await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+    if (command.admin === true) {
+        if (interaction.user.id != '497567854884028446' || interaction.user.id === '122568101995872256' || interaction.user.id === '775221726564450324') {
+            try {
+                await command.execute(interaction, client);
+            } catch (error) {
+                await console.error(error);
+                await interaction.editReply({ content: 'There was an error while executing this command!', ephemeral: true });
+            }
+        } else {
+            await interaction.editReply('This command is an admin command, therefore you can\'t use it!')
+        }
+    } else {
+        try {
+            await command.execute(interaction, client);
+        } catch (error) {
+            await console.error(error);
+            await interaction.editReply({ content: 'There was an error while executing this command!', ephemeral: true });
+        }
     }
     
 });
@@ -85,6 +109,21 @@ client.on('messageCreate', async message => {
 	message.react('<:balls:894382977772044318>');
 	count = 0;
     }
+});
+
+player.on("error", (queue, error) => {
+    console.log(`[${queue.guild.name}] Error emitted from the queue: ${error.message}`);
+});
+player.on("connectionError", (queue, error) => {
+    console.log(`[${queue.guild.name}] Error emitted from the connection: ${error.message}`);
+});
+
+player.on("botDisconnect", (queue) => {
+    queue.metadata.send("❌ | I was manually disconnected from the voice channel, clearing queue!");
+});
+
+player.on("channelEmpty", (queue) => {
+    queue.metadata.send("❌ | Nobody is in the voice channel, leaving...");
 });
 
 // login to Discord
