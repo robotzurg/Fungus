@@ -18,9 +18,9 @@ const registerCommands = [];
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 const player = new Player(client, {
     ytdlOptions: {
-        quality: 'highestaudio',
-        hightWaterMark: 1 << 25,
-    }
+	quality: "highestaudio",
+	highWaterMark: 1 << 25,
+    },
 });
 
 client.plr = player;

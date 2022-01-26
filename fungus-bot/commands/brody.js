@@ -16,7 +16,7 @@ module.exports = {
 						 'Brody owes the person who pinged this 20 dollars', 'Brody watches anime porn', 'Brody is a giggler',
 						 'Brody would trade his girlfriend for Ryan Reynolds. This isnt a bullying thing, its just true.', 
 						 'Brody got an anus tattooed between his butt cheeks because he was born without one.', 'Brody is not Technoblade',
-						 'Brody would stick a cactus up his ass if he was horny enough'];
+						 'Brody would stick a cactus up his ass if he was horny enough', 'Brody is just a little guy'];
 
         let random = outputs[Math.floor(Math.random() * outputs.length)];
 		if (ping === true) random = random.replace('Brody', '<@450496000289669122>');
